@@ -78,21 +78,39 @@ public class FluxMonoTransformTest {
     }
 
     @Test
-    public void transform_using_flatMap_faster(){
+    public void transform_using_flatMap_faster() {
         Flux<String> alphaFlux = Flux.fromStream(alphabets.stream())
                 .window(3)
-                .flatMap((s)->
-                    s.map(this::makeAServiceCall).subscribeOn(Schedulers.parallel())
+                .flatMap((s) ->
+                        s.map(this::makeAServiceCall).subscribeOn(Schedulers.parallel())
                 )
                 .flatMap(f -> Flux.fromIterable(f))
                 .log();
 
         StepVerifier.create(alphaFlux)
-                .expectNextCount(alphabets.size()*3)
+                .expectNextCount(alphabets.size() * 3)
                 .verifyComplete()
         ;
-
     }
+        @Test
+        public void transform_using_flatMap_faster_maintain_order(){
+            Flux<String> alphaFlux = Flux.fromStream(alphabets.stream())
+                    .window(3)
+                    .concatMap((s)->
+                    s.map(this::makeAServiceCall).subscribeOn(Schedulers.parallel())
+                    )
+                    /*.flatMapSequential((s)->
+                            s.map(this::makeAServiceCall).subscribeOn(Schedulers.parallel())
+                    )*/
+                    .flatMap(f -> Flux.fromIterable(f))
+                    .log();
+
+            StepVerifier.create(alphaFlux)
+                    .expectNextCount(alphabets.size()*3)
+                    .verifyComplete()
+            ;
+
+        }
 
 
     private List<String> makeAServiceCall(String s) {
