@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
@@ -27,5 +28,15 @@ public class FluxAndMonoController {
         return Flux.range(1,10)
                 .delayElements(Duration.ofSeconds(1))
                 .log();
+    }
+
+    @GetMapping(value = "/fluxinfinite" ,produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+    public Flux<Long> fetchLongInfiniteStream(){
+        return Flux.interval(Duration.ofSeconds(1));
+    }
+
+    @GetMapping(value = "/mono")
+    public Mono<Integer> fetchMonoIntValue(){
+        return Mono.just(1);
     }
 }
